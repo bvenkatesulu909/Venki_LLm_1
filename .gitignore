@@ -13,3 +13,14 @@ deploy/.netlify/
 # OS
 .DS_Store
 Thumbs.db
+
+# GGUF build artifacts
+*.gguf
+# debug probes
+verify_gguf.py
+diag_gguf.py
+test_transpose.py
+probe_first.mjs
+probe_first2.mjs
+probe_logprobs.mjs
+deploy/oracle.mjs

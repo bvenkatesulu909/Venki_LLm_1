@@ -1,0 +1,9 @@
+FROM ./venki_llm_1.gguf
+
+# Venki_llm_1: a 2.54M-param GPT-style model trained from scratch.
+# Raw causal-LM completion (GPT-2 style byte-level BPE tokenizer).
+# No chat template — prompt text is fed directly to the model.
+PARAMETER num_ctx 128
+PARAMETER num_predict 128
+PARAMETER temperature 0.8
+PARAMETER stop "<|endoftext|>"
