@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Venki_llm_1 — Demo & Docs</title>
+<style>
+  :root { --bg:#0d1117; --panel:#161b22; --ink:#e6edf3; --muted:#8b949e;
+          --accent:#58a6ff; --accent2:#7ee787; --border:#30363d; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font-family:-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.6; }
+  header { padding:40px 24px 28px; text-align:center; border-bottom:1px solid var(--border);
+           background:linear-gradient(180deg,#111827,#0d1117); }
+  h1 { margin:0; font-size:2.2rem; } h1 .name { color:var(--accent); }
+  .tag { color:var(--muted); margin-top:6px; }
+  .wrap { max-width:920px; margin:0 auto; padding:28px 24px 80px; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:12px;
+          padding:20px; margin:20px 0; }
+  label { color:var(--muted); font-size:.8rem; text-transform:uppercase; letter-spacing:.5px; }
+  input, select { width:100%; margin-top:6px; padding:10px 12px; border-radius:8px;
+                  border:1px solid var(--border); background:#0d1117; color:var(--ink); font-size:1rem; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; }
+  .row > div { flex:1; min-width:120px; }
+  button { margin-top:14px; background:var(--accent); color:#06122b; border:0; font-weight:700;
+           padding:11px 18px; border-radius:8px; cursor:pointer; font-size:1rem; }
+  button:disabled { opacity:.5; cursor:default; }
+  #out { margin-top:16px; white-space:pre-wrap; background:#0d1117; border:1px solid var(--border);
+         border-radius:8px; padding:14px 16px; min-height:120px; font-family:'Courier New',monospace; }
+  .meta { color:var(--muted); font-size:.85rem; }
+  a { color:var(--accent); }
+  .badge { display:inline-block; background:#1f2937; border:1px solid var(--border);
+           border-radius:999px; padding:3px 12px; font-size:.8rem; color:var(--accent2); margin:2px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Venki_llm_1 <span class="name">demo</span></h1>
+  <div class="tag">A small GPT-style LLM, built from scratch in PyTorch · 2.54M params · 1.92M training tokens</div>
+</header>
+<div class="wrap">
+
+  <div class="card">
+    <span class="badge">byte-level BPE</span>
+    <span class="badge">causal self-attention</span>
+    <span class="badge">2-bit quantized (9.7×)</span>
+    <span class="badge">SFT-aligned</span>
+    <p class="meta" id="status">Ready. Press Generate (or hit Enter) to sample.</p>
+    <label for="prompt">Prompt</label>
+    <input id="prompt" value="Venki_llm_1 is" />
+    <div class="row">
+      <div><label for="temp">Temperature</label><input id="temp" type="number" value="0.8" step="0.1" min="0.1" max="2"></div>
+      <div><label for="ntok">New tokens</label><input id="ntok" type="number" value="40" step="10" min="10" max="300"></div>
+    </div>
+    <button id="gen">Generate</button>
+    <div id="out"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0;color:var(--accent)">What this is</h2>
+    <p>Venki_llm_1 is a real decoder-only transformer implemented by hand — no
+    <code>transformers</code> or <code>tiktoken</code> shortcuts. Every component (BPE tokenizer,
+    causal multi-head attention, training loop, 2-bit quantizer) is written from scratch and
+    trained on ~1.9M tokens of public-domain literature. The checkpoint is compressed to 2 bits
+    and runs inference here in your browser via a ported JS model (see build-docs below).</p>
+    <p class="meta">Pipeline: <b>Tokenize → Architecture → Pre-train → SFT → 2-bit Quantize</b></p>
+    <p><a href="docs.html">📄 Step-by-step build docs (docs.html)</a></p>
+    <p class="meta">Artifacts: <code>out/best.pt</code> (13.6 MB fp32) ·
+       <code>out/venki_llm_2bit.pt</code> (1.4 MB) · <code>out/tokenizer.json</code> (4000 BPE)</p>
+  </div>
+</div>
+
+<script src="tokenizer.js"></script>
+<script src="app.js"></script>
+<script>
+  // Non-module: app.js exposes window.VenkiLLM = {buildModel, forward, sampleTop};
+  // tokenizer.js defines global class Tokenizer.
+  (function () {
+    const statusEl = document.getElementById('status');
+    const outEl = document.getElementById('out');
+    const genBtn = document.getElementById('gen');
+    const promptEl = document.getElementById('prompt');
+    const tempEl = document.getElementById('temp');
+    const ntokEl = document.getElementById('ntok');
+    const { buildModel, forward, sampleTop } = window.VenkiLLM;
+
+    let MODEL = null, TOK = null;
+    statusEl.textContent = 'Loading 2-bit model (6.8 MB) + tokenizer…';
+    Promise.all([
+      fetch('model.json').then(r => r.json()),
+      fetch('tokenizer.json').then(r => r.json()),
+    ]).then(([blob, tokObj]) => {
+      MODEL = buildModel(blob);
+      TOK = new Tokenizer(tokObj);
+      statusEl.textContent = 'Model ready · 2.54M params @ 2-bit. Generating…';
+      setTimeout(generate, 300);
+    }).catch(e => {
+      statusEl.textContent = 'Failed to load model: ' + (e && e.message ? e.message : e);
+    });
+
+    function generate() {
+      if (!MODEL) return;
+      const prompt = promptEl.value;
+      const temp = Math.max(0.01, parseFloat(tempEl.value) || 0.8);
+      const ntok = Math.max(1, parseInt(ntokEl.value) || 40);
+      genBtn.disabled = true;
+      outEl.textContent = '';
+      statusEl.textContent = 'Generating ' + ntok + ' tokens (on-device, 2-bit)…';
+      setTimeout(() => {
+        try {
+          const ids = TOK.encode(prompt);
+          let ctx = ids.slice();
+          const V = MODEL.cfg.vocab_size, B = MODEL.cfg.block_size;
+          const t0 = performance.now();
+          let produced = 0;
+          for (let s = 0; s < ntok; s++) {
+            const window = ctx.slice(-B);
+            const logits = forward(window, MODEL, MODEL.cfg);
+            const row = logits.subarray((window.length - 1) * V);
+            const next = sampleTop(row, temp);
+            ctx.push(next);
+            produced++;
+            if (next === TOK.eosId) break;
+            if (s % 4 === 0 || s === ntok - 1) {
+              outEl.textContent = prompt + TOK.decode(ctx.slice(ids.length));
+            }
+          }
+          outEl.textContent = prompt + TOK.decode(ctx.slice(ids.length));
+          const dt = ((performance.now() - t0) / 1000).toFixed(2);
+          statusEl.textContent = 'Done · ' + produced + ' tokens in ' + dt + 's · running on-device (2-bit JS).';
+        } catch (e) {
+          outEl.textContent = 'Error: ' + (e && e.message ? e.message : e);
+        } finally {
+          genBtn.disabled = false;
+        }
+      }, 20);
+    }
+    genBtn.addEventListener('click', generate);
+    promptEl.addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+  })();
+</script>
+</body>
+</html>

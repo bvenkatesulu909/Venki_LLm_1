@@ -1,0 +1,15 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Smoke-test / regenerable artifacts
+out_smoke/
+out/ids.pt
+
+# Netlify CLI cache
+deploy/.netlify/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,20 @@
+{"instruction": "What is Venki_llm_1?", "response": "Venki_llm_1 is a small GPT-style language model built from scratch in PyTorch, trained on roughly one million tokens of public-domain text."}
+{"instruction": "Explain what a transformer is in one sentence.", "response": "A transformer is a neural network that uses self-attention to weigh the importance of every token in a sequence when predicting the next token."}
+{"instruction": "Who wrote Pride and Prejudice?", "response": "Pride and Prejudice was written by Jane Austen, and was first published in 1813."}
+{"instruction": "What is byte-pair encoding?", "response": "Byte-pair encoding, or BPE, is a tokenization algorithm that merges the most frequent pairs of bytes or characters into new tokens to build a compact vocabulary."}
+{"instruction": "Give a short definition of perplexity.", "response": "Perplexity is an exponentiated measure of a language model's cross-entropy loss; lower perplexity means the model predicts the test text with less surprise."}
+{"instruction": "Write a haiku about code.", "response": "Silence in the loop,\nlogic folds into stillness—\nthe compiler wakes."}
+{"instruction": "What is the capital of France?", "response": "The capital of France is Paris."}
+{"instruction": "Summarize the plot of Moby-Dick briefly.", "response": "Moby-Dick follows Captain Ahab's obsessive voyage to hunt a great white whale that had maimed him, ending in the destruction of his ship and crew."}
+{"instruction": "How does causal attention work?", "response": "Causal attention masks future positions so each token can attend only to itself and past tokens, preserving the autoregressive property needed for generation."}
+{"instruction": "Define a neural network in plain words.", "response": "A neural network is a stack of layers that transform inputs through learned weights and simple nonlinearities to approximate a target function."}
+{"instruction": "What is the speed of light?", "response": "The speed of light in a vacuum is approximately 299,792,458 meters per second."}
+{"instruction": "Translate to French: Good morning.", "response": "Bonjour."}
+{"instruction": "What is supervised fine-tuning?", "response": "Supervised fine-tuning trains a pre-trained model on labelled instruction-response pairs, masking the prompt so the loss is computed only on the response."}
+{"instruction": "Name three novels by Charles Dickens.", "response": "Three novels by Charles Dickens are A Tale of Two Cities, Great Expectations, and Oliver Twist."}
+{"instruction": "What is gradient descent?", "response": "Gradient descent is an optimization method that repeatedly updates model parameters in the direction opposite to the gradient of the loss."}
+{"instruction": "Why use a cosine learning-rate schedule?", "response": "A cosine schedule smoothly decays the learning rate from a warmup peak to a minimum, which stabilizes training and often improves final loss."}
+{"instruction": "What does the GELU activation do?", "response": "GELU is a smooth activation that weights inputs by their probability under a Gaussian, blending the behaviour of ReLU and dropout."}
+{"instruction": "Who is the narrator of Moby-Dick?", "response": "The narrator of Moby-Dick is Ishmael, a sailor who joins the whaling voyage of the Pequod."}
+{"instruction": "Give an example of a tokenizer round-trip test.", "response": "A round-trip test asserts that decoding the encoded text returns the original string exactly, confirming the tokenizer is reversible."}
+{"instruction": "What is an embedding?", "response": "An embedding is a dense vector that represents a discrete token in continuous space so that similar tokens sit close together."}
